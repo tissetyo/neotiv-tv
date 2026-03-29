@@ -12,7 +12,7 @@ interface PageProps {
 
 const SESSION_KEY = (hotelSlug: string, roomCode: string) => `neotiv_room_${hotelSlug}_${roomCode}`;
 
-export default function RoomEntryPage({ params }: PageProps): JSX.Element {
+export default function RoomEntryPage({ params }: PageProps) {
   const { hotelSlug, roomCode } = use(params);
   const router = useRouter();
 

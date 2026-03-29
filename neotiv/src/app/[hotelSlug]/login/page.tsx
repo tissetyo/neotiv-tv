@@ -9,7 +9,7 @@ interface LoginPageProps {
   searchParams: Promise<{ error?: string }>;
 }
 
-export default function StaffLoginPage({ params, searchParams }: LoginPageProps): JSX.Element {
+export default function StaffLoginPage({ params, searchParams }: LoginPageProps) {
   const router = useRouter();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');

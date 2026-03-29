@@ -20,7 +20,7 @@ export async function POST(
     const supabase = createServiceClient();
 
     // 1. Look up hotel by slug
-    const { data: hotel, error: hotelError } = await supabase
+    const responseHotel = await supabase
       .from('hotels')
       .select(
         'id, name, location, timezone, wifi_ssid, wifi_password, wifi_username, ' +
@@ -31,13 +31,16 @@ export async function POST(
       .eq('slug', hotelSlug)
       .eq('is_active', true)
       .single();
+    
+    const hotelError = responseHotel.error;
+    const hotel = responseHotel.data as any;
 
     if (hotelError || !hotel) {
       return NextResponse.json({ error: 'Hotel not found' }, { status: 404 });
     }
 
     // 2. Look up room by hotel_id + room_code (server-side PIN check)
-    const { data: room, error: roomError } = await supabase
+    const responseRoom = await supabase
       .from('rooms')
       .select(
         'id, room_code, pin, guest_name, guest_photo_url, background_url, custom_welcome_message'
@@ -45,6 +48,9 @@ export async function POST(
       .eq('hotel_id', hotel.id)
       .eq('room_code', roomCode)
       .single();
+      
+    const roomError = responseRoom.error;
+    const room = responseRoom.data as any;
 
     if (roomError || !room) {
       return NextResponse.json({ error: 'Room not found' }, { status: 404 });

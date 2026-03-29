@@ -5,7 +5,7 @@ import { useRouter, useParams } from 'next/navigation';
 import { useRoomStore } from '@/stores/roomStore';
 
 // Phase 1 stub — Phase 2 will build the full widget dashboard
-export default function MainDashboardPage(): JSX.Element {
+export default function MainDashboardPage() {
   const router = useRouter();
   const params = useParams<{ hotelSlug: string; roomCode: string }>();
   const { hotelSlug, roomCode } = params;

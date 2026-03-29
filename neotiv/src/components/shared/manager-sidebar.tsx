@@ -10,7 +10,7 @@ export default async function ManagerSidebar({
   hotelSlug,
   hotelName,
   role,
-}: ManagerSidebarProps): Promise<JSX.Element> {
+}: ManagerSidebarProps) {
   const isManager = role === 'manager' || role === 'superadmin';
 
   const navItems = [
@@ -174,7 +174,7 @@ function NavLink({
   href: string;
   icon: string;
   label: string;
-}): JSX.Element {
+}) {
   return (
     <a
       href={href}
