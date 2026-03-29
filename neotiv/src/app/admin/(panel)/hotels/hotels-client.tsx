@@ -11,6 +11,8 @@ export default function HotelsClient({ initialHotels }: { initialHotels: any[] }
   const [slug, setSlug] = useState('');
   const [location, setLocation] = useState('');
   const [timezone, setTimezone] = useState('UTC');
+  const [adminEmail, setAdminEmail] = useState('');
+  const [adminPassword, setAdminPassword] = useState('');
   const [loading, setLoading] = useState(false);
   const router = useRouter();
 
@@ -24,7 +26,7 @@ export default function HotelsClient({ initialHotels }: { initialHotels: any[] }
     setLoading(true);
     const res = await fetch('/api/admin/hotels', {
       method: 'POST',
-      body: JSON.stringify({ name, slug, location, timezone }),
+      body: JSON.stringify({ name, slug, location, timezone, adminEmail, adminPassword }),
       headers: { 'Content-Type': 'application/json' }
     });
     const d = await res.json();
@@ -37,7 +39,7 @@ export default function HotelsClient({ initialHotels }: { initialHotels: any[] }
     
     alert('Hotel created successfully!');
     setShowAdd(false);
-    setName(''); setSlug(''); setLocation('');
+    setName(''); setSlug(''); setLocation(''); setAdminEmail(''); setAdminPassword('');
     router.refresh();
   };
 
@@ -76,6 +78,17 @@ export default function HotelsClient({ initialHotels }: { initialHotels: any[] }
                  <option value="Europe/London">Europe/London (GMT)</option>
                  <option value="America/New_York">America/New_York (EST)</option>
                </select>
+            </div>
+          </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px', background: '#e2e8f0', padding: '16px', borderRadius: '8px', marginTop: '4px' }}>
+            <div>
+               <label style={labelStyle}>Initial Admin Email (Optional)</label>
+               <input type="email" value={adminEmail} onChange={e => setAdminEmail(e.target.value)} placeholder="manager@resort.com" style={inputStyle} />
+            </div>
+            <div>
+               <label style={labelStyle}>Initial Password</label>
+               <input type="text" value={adminPassword} onChange={e => setAdminPassword(e.target.value)} placeholder="Secret password" style={inputStyle} />
+               <p style={{ fontSize: '11px', color: '#64748b', marginTop: '4px' }}>They can use this to instantly sign into the hotel dashboard.</p>
             </div>
           </div>
           <div style={{ display: 'flex', gap: '12px', marginTop: '8px' }}>

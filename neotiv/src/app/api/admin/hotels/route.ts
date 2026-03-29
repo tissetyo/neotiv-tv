@@ -12,7 +12,7 @@ export async function POST(request: Request) {
     }
 
     const body = await request.json();
-    const { name, slug, location, timezone } = body;
+    const { name, slug, location, timezone, adminEmail, adminPassword } = body;
 
     if (!name || !slug) {
       return NextResponse.json({ error: 'Name and slug are required' }, { status: 400 });
@@ -50,8 +50,29 @@ export async function POST(request: Request) {
       }));
       await adminSupabase.from('services').insert(defaultsToSeed);
     }
+    
+    // 4. Optionally create a Manager Account immediately
+    if (adminEmail && adminPassword) {
+      const { data: newUser, error: authError } = await adminSupabase.auth.admin.createUser({
+        email: adminEmail,
+        password: adminPassword,
+        email_confirm: true,
+        user_metadata: { role: 'manager', hotel_id: hotel.id, name: 'General Manager' }
+      });
+      
+      if (!authError && newUser.user) {
+        await adminSupabase.from('staff').insert({
+          hotel_id: hotel.id,
+          user_id: newUser.user.id,
+          role: 'manager',
+          name: 'General Manager',
+          email: adminEmail,
+          is_active: true
+        });
+      }
+    }
 
-    // 4. Activity Log
+    // 5. Activity Log
     await adminSupabase.from('activity_log').insert({
       actor_id: user.id,
       actor_email: user.email,
