@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 
-export default async function AdminMonitorPage(): Promise<JSX.Element> {
+export default async function AdminMonitorPage() {
   const supabase = await createClient();
   
   // Fetch aggregations natively over RLS bypassing Super Admin since we are querying globally

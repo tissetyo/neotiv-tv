@@ -10,7 +10,7 @@ interface SettingsLayoutProps {
 export default async function SettingsLayout({
   children,
   params,
-}: SettingsLayoutProps): Promise<JSX.Element> {
+}: SettingsLayoutProps) {
   const { hotelSlug } = await params;
   const supabase = await createClient();
   const {

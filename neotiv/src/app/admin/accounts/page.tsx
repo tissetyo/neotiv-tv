@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import AccountsClient from './accounts-client';
 
-export default async function AdminAccountsPage(): Promise<JSX.Element> {
+export default async function AdminAccountsPage() {
   const supabase = await createClient();
   
   const { data: staff } = await supabase

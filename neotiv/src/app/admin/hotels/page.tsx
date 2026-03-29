@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import HotelsClient from './hotels-client';
 
-export default async function AdminHotelsPage(): Promise<JSX.Element> {
+export default async function AdminHotelsPage() {
   const supabase = await createClient();
   
   // We specify '*' using generic syntax to bypass IDE lints natively

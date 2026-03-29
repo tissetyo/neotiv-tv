@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import SettingsClient from './settings-client';
 
-export default async function AdminSettingsPage(): Promise<JSX.Element> {
+export default async function AdminSettingsPage() {
   const supabase = await createClient();
   
   const { data: presets } = await supabase

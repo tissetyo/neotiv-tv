@@ -10,7 +10,7 @@ interface AnalyticsLayoutProps {
 export default async function AnalyticsLayout({
   children,
   params,
-}: AnalyticsLayoutProps): Promise<JSX.Element> {
+}: AnalyticsLayoutProps) {
   const { hotelSlug } = await params;
   const supabase = await createClient();
   const {

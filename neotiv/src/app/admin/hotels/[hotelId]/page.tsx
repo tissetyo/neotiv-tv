@@ -2,7 +2,7 @@ import { createClient } from '@/lib/supabase/server';
 import Link from 'next/link';
 import HotelDetailClient from './hotel-detail-client';
 
-export default async function AdminHotelDetailPage({ params }: { params: Promise<{ hotelId: string }> }): Promise<JSX.Element> {
+export default async function AdminHotelDetailPage({ params }: { params: Promise<{ hotelId: string }> }) {
   const { hotelId } = await params;
   const supabase = await createClient();
   

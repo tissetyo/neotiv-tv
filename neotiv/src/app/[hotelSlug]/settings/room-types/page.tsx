@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import RoomTypesClient from './room-types-client';
 
-export default async function RoomTypesPage({ params }: { params: Promise<{ hotelSlug: string }> }): Promise<JSX.Element> {
+export default async function RoomTypesPage({ params }: { params: Promise<{ hotelSlug: string }> }) {
   const { hotelSlug } = await params;
   const supabase = await createClient();
   

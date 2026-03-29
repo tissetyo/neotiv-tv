@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import AnnouncementsClient from './announcements-client';
 
-export default async function AdminAnnouncementsPage(): Promise<JSX.Element> {
+export default async function AdminAnnouncementsPage() {
   const supabase = await createClient();
   
   const { data: hotels } = await supabase

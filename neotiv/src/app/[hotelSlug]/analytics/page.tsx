@@ -1,6 +1,6 @@
 import { createClient } from '@/lib/supabase/server';
 
-export default async function AnalyticsPage({ params }: { params: Promise<{ hotelSlug: string }> }): Promise<JSX.Element> {
+export default async function AnalyticsPage({ params }: { params: Promise<{ hotelSlug: string }> }) {
   const { hotelSlug } = await params;
   const supabase = await createClient();
   

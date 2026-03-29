@@ -4,7 +4,7 @@ interface Props {
   params: Promise<{ hotelSlug: string }>;
 }
 
-export default async function RoomsPage({ params }: Props): Promise<JSX.Element> {
+export default async function RoomsPage({ params }: Props) {
   const { hotelSlug } = await params;
   const supabase = await createClient();
   const {

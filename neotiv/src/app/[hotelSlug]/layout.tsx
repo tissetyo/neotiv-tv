@@ -6,7 +6,7 @@ interface HotelLayoutProps {
   params: Promise<{ hotelSlug: string }>;
 }
 
-export default async function HotelLayout({ children, params }: HotelLayoutProps): Promise<JSX.Element> {
+export default async function HotelLayout({ children, params }: HotelLayoutProps) {
   const { hotelSlug } = await params;
   const supabase = await createClient();
 

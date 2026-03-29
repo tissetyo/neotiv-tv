@@ -5,7 +5,7 @@ interface PageProps {
   params: Promise<{ hotelSlug: string }>;
 }
 
-export default async function SettingsPage({ params }: PageProps): Promise<JSX.Element> {
+export default async function SettingsPage({ params }: PageProps) {
   const { hotelSlug } = await params;
   const supabase = await createClient();
   const { data: hotel } = await supabase.from('hotels').select('*').eq('slug', hotelSlug).single();

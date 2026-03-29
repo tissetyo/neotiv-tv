@@ -1,7 +1,7 @@
 import { createClient } from '@/lib/supabase/server';
 import StaffClient from './staff-client';
 
-export default async function StaffSettingsPage({ params }: { params: Promise<{ hotelSlug: string }> }): Promise<JSX.Element> {
+export default async function StaffSettingsPage({ params }: { params: Promise<{ hotelSlug: string }> }) {
   const { hotelSlug } = await params;
   const supabase = await createClient();
   

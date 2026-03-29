@@ -10,7 +10,7 @@ interface FrontOfficeLayoutProps {
 export default async function FrontOfficeLayout({
   children,
   params,
-}: FrontOfficeLayoutProps): Promise<JSX.Element> {
+}: FrontOfficeLayoutProps) {
   const { hotelSlug } = await params;
   const supabase = await createClient();
   const {
