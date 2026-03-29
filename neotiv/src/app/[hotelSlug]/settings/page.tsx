@@ -14,8 +14,11 @@ export default async function SettingsPage({ params }: PageProps) {
   if (!hotel) return <div>Hotel not found</div>;
 
   return (
-    <div style={{ padding: '32px', maxWidth: '1000px', margin: '0 auto' }}>
-      <h1 style={{ fontSize: '24px', fontWeight: 700, marginBottom: '24px', color: '#0f172a' }}>Hotel Settings</h1>
+    <div className="p-12 max-w-[1200px] mx-auto font-staff">
+      <div className="mb-10">
+        <h1 className="text-3xl font-black text-slate-900 tracking-tight leading-none mb-2">Property Configuration</h1>
+        <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Global metadata & network settings</p>
+      </div>
       <SettingsTabs hotel={hotel} initialAnnouncements={announcements ?? []} />
     </div>
   );

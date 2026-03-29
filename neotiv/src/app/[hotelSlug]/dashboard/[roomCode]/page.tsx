@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback, use } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import Image from 'next/image';
+import WelcomeScreen from '@/components/tv/WelcomeScreen';
 import type { RoomSession } from '@/types';
 
 interface PageProps {
@@ -21,7 +22,6 @@ export default function RoomEntryPage({ params }: PageProps) {
   const [session, setSession] = useState<RoomSession | null>(null);
   const [pinError, setError] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [countdown, setCountdown] = useState(5);
 
   // Check localStorage for existing session
   useEffect(() => {
@@ -39,33 +39,9 @@ export default function RoomEntryPage({ params }: PageProps) {
     }
   }, [hotelSlug, roomCode]);
 
-  // Countdown from welcome → main
-  useEffect(() => {
-    if (screen !== 'welcome') return;
-    const interval = setInterval(() => {
-      setCountdown((c) => {
-        if (c <= 1) {
-          clearInterval(interval);
-          router.push(`/${hotelSlug}/dashboard/${roomCode}/main`);
-          return 0;
-        }
-        return c - 1;
-      });
-    }, 1000);
-    return () => clearInterval(interval);
-  }, [screen, hotelSlug, roomCode, router]);
-
-  // D-pad: Enter on welcome skips countdown
-  useEffect(() => {
-    if (screen !== 'welcome') return;
-    const handler = (e: KeyboardEvent): void => {
-      if (e.key === 'Enter' || e.key === ' ') {
-        router.push(`/${hotelSlug}/dashboard/${roomCode}/main`);
-      }
-    };
-    window.addEventListener('keydown', handler);
-    return () => window.removeEventListener('keydown', handler);
-  }, [screen, hotelSlug, roomCode, router]);
+  const handleWelcomeFinish = useCallback(() => {
+    router.push(`/${hotelSlug}/dashboard/${roomCode}/main`);
+  }, [hotelSlug, roomCode, router]);
 
   const submitPin = useCallback(async (digits: string[]): Promise<void> => {
     if (digits.length !== 4 || isSubmitting) return;
@@ -113,39 +89,48 @@ export default function RoomEntryPage({ params }: PageProps) {
     setPin((prev) => prev.slice(0, -1));
   }, []);
 
-  // D-pad numpad navigation for PIN
+  // Keyboard support for PIN & skip welcome
   useEffect(() => {
-    if (screen !== 'pin') return;
     const handler = (e: KeyboardEvent): void => {
-      if (e.key >= '0' && e.key <= '9') pressKey(e.key);
-      if (e.key === 'Backspace') backspace();
+      if (screen === 'pin') {
+        if (e.key >= '0' && e.key <= '9') pressKey(e.key);
+        if (e.key === 'Backspace') backspace();
+      } else if (screen === 'welcome') {
+        if (e.key === 'Enter' || e.key === ' ') handleWelcomeFinish();
+      }
     };
     window.addEventListener('keydown', handler);
     return () => window.removeEventListener('keydown', handler);
-  }, [screen, pressKey, backspace]);
+  }, [screen, pressKey, backspace, handleWelcomeFinish]);
 
   const numpadKeys = ['1','2','3','4','5','6','7','8','9','','0','⌫'];
 
   if (screen === 'loading') {
     return (
       <div className="fixed inset-0 bg-slate-950 flex items-center justify-center">
-        <div className="w-8 h-8 border-2 border-teal-500 border-t-transparent rounded-full animate-spin" />
+        <div className="w-12 h-12 border-2 border-teal-500 border-t-transparent rounded-full animate-spin shadow-2xl shadow-teal-500/20" />
       </div>
     );
   }
 
   return (
-    <div className="fixed inset-0 overflow-hidden" style={{ width: '100vw', height: '100vh' }}>
-      {/* Background — hotel surfing image fallback */}
-      <div
-        className="absolute inset-0 bg-cover bg-center"
-        style={{
-          backgroundImage: session?.backgroundUrl
-            ? `url(${session.backgroundUrl})`
-            : 'linear-gradient(135deg, #0f4c6e 0%, #1a7a6e 40%, #0f172a 100%)',
-        }}
-      />
-      <div className="absolute inset-0 bg-black/20" />
+    <div className="fixed inset-0 overflow-hidden bg-slate-950" style={{ width: '1920px', height: '1080px' }}>
+      {/* Background with Ambient Overlay */}
+      <AnimatePresence>
+        <motion.div
+           key={session?.backgroundUrl || 'default'}
+           initial={{ opacity: 0 }}
+           animate={{ opacity: 1 }}
+           transition={{ duration: 1.5 }}
+           className="absolute inset-0 bg-cover bg-center"
+           style={{
+             backgroundImage: session?.backgroundUrl
+               ? `url(${session.backgroundUrl})`
+               : 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)',
+           }}
+        />
+      </AnimatePresence>
+      <div className="absolute inset-0 bg-black/40 backdrop-blur-sm" />
 
       <AnimatePresence mode="wait">
         {/* ━━━ PIN ENTRY SCREEN ━━━ */}
@@ -153,60 +138,48 @@ export default function RoomEntryPage({ params }: PageProps) {
           <motion.div
             key="pin"
             className="absolute inset-0 flex items-center justify-center"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+            initial={{ opacity: 0, scale: 0.9 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 1.1 }}
           >
             <motion.div
               animate={pinError ? { x: [-16, 16, -12, 12, -8, 8, 0] } : { x: 0 }}
               transition={{ duration: 0.4 }}
-              className="tv-widget text-center"
-              style={{ width: '360px', padding: '40px' }}
+              className="tv-widget text-center bg-slate-900/60 backdrop-blur-2xl border-white/10"
+              style={{ width: '480px', padding: '60px' }}
             >
-              {/* Hotel logo placeholder */}
-              <div className="w-16 h-16 rounded-2xl bg-teal-500/20 border border-teal-500/30 flex items-center justify-center mx-auto mb-6">
-                <span className="text-teal-400 text-2xl font-bold" style={{ fontFamily: 'var(--font-display)' }}>N</span>
+              <div className="w-20 h-20 rounded-3xl bg-teal-500/20 border border-teal-500/30 flex items-center justify-center mx-auto mb-10 shadow-lg">
+                <span className="text-teal-400 text-3xl font-bold tv-font-display">N</span>
               </div>
 
-              <p className="text-white/60 text-sm mb-1">Room</p>
-              <p className="text-white font-bold mb-6" style={{ fontSize: '28px', fontFamily: 'var(--font-display)' }}>
-                {roomCode}
-              </p>
+              <div className="mb-10 text-center">
+                <p className="text-white/40 text-sm font-black uppercase tracking-[0.2em] mb-2 leading-none">Access Control</p>
+                <p className="text-white text-4xl font-bold tv-font-display leading-tight tracking-tight">
+                  Room <span className="text-teal-400">{roomCode}</span>
+                </p>
+              </div>
 
-              <p className="text-white/70 text-sm mb-5">Enter PIN</p>
-
-              {/* PIN dots */}
-              <div className="flex justify-center gap-4 mb-8">
+              {/* PIN Indicators */}
+              <div className="flex justify-center gap-6 mb-12">
                 {[0, 1, 2, 3].map((i) => (
-                  <div
+                  <motion.div
                     key={i}
-                    className={`w-4 h-4 rounded-full transition-all duration-200 ${
-                      i < pin.length ? 'bg-teal-400 scale-110' : 'bg-white/20'
-                    }`}
+                    animate={i < pin.length ? { scale: 1.2, backgroundColor: '#14b8a6' } : { scale: 1, backgroundColor: 'rgba(255,255,255,0.1)' }}
+                    className="w-5 h-5 rounded-full border border-white/20 shadow-inner"
                   />
                 ))}
               </div>
 
-              {pinError && (
-                <p className="text-red-400 text-xs mb-4">Incorrect PIN. Please try again.</p>
-              )}
-
               {/* Numpad */}
-              <div className="grid grid-cols-3 gap-3">
+              <div className="grid grid-cols-3 gap-6">
                 {numpadKeys.map((key, idx) => (
-                  key === '' ? (
-                    <div key={idx} />
-                  ) : (
+                  key === '' ? <div key={idx} /> : (
                     <button
                       key={idx}
                       onClick={() => key === '⌫' ? backspace() : pressKey(key)}
-                      className="tv-focusable w-full py-3 rounded-xl font-semibold text-white transition-all duration-150 focus:scale-95"
-                      style={{
-                        background: 'rgba(255,255,255,0.1)',
-                        border: '1px solid rgba(255,255,255,0.15)',
-                        fontSize: '20px',
-                      }}
+                      className="tv-focusable aspect-square flex items-center justify-center rounded-2xl bg-white/5 border border-white/10 text-white font-bold text-2xl transition-all hover:bg-white/10 active:bg-teal-500/20"
                       tabIndex={0}
+                      data-focusable="true"
                     >
                       {key}
                     </button>
@@ -214,10 +187,10 @@ export default function RoomEntryPage({ params }: PageProps) {
                 ))}
               </div>
 
-              {isSubmitting && (
-                <div className="mt-4 flex justify-center">
-                  <div className="w-5 h-5 border-2 border-teal-400 border-t-transparent rounded-full animate-spin" />
-                </div>
+              {pinError && (
+                <motion.p initial={{ opacity: 0 }} animate={{ opacity: 1 }} className="text-rose-500 font-bold text-sm mt-8 absolute w-full left-0 bottom-12">
+                  INVALID PIN • ACCESS DENIED
+                </motion.p>
               )}
             </motion.div>
           </motion.div>
@@ -225,91 +198,11 @@ export default function RoomEntryPage({ params }: PageProps) {
 
         {/* ━━━ WELCOME / SPLASH SCREEN ━━━ */}
         {screen === 'welcome' && session && (
-          <motion.div
-            key="welcome"
-            className="absolute inset-0"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-          >
-            {/* Room number — top right */}
-            <div className="absolute top-8 right-10 text-right">
-              <p className="text-white/70 text-sm font-medium tracking-widest uppercase">Room</p>
-              <p className="text-white font-bold leading-none" style={{ fontSize: '72px', fontFamily: 'var(--font-display)' }}>
-                {roomCode}
-              </p>
-            </div>
-
-            {/* Centered welcome card */}
-            <div className="absolute inset-0 flex items-center justify-center" style={{ paddingLeft: '15%' }}>
-              <motion.div
-                initial={{ opacity: 0, y: 40 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.7, ease: 'easeOut' }}
-                className="relative"
-                style={{ width: '520px' }}
-              >
-                {/* Guest avatar — overlaps card top */}
-                <div className="absolute -top-12 left-10 z-10">
-                  {session.guestPhotoUrl ? (
-                    <Image
-                      src={session.guestPhotoUrl}
-                      alt="Guest"
-                      width={96}
-                      height={96}
-                      className="w-24 h-24 rounded-full object-cover border-4 border-white/30 shadow-xl"
-                    />
-                  ) : (
-                    <div className="w-24 h-24 rounded-full bg-teal-500/30 border-4 border-white/30 flex items-center justify-center shadow-xl">
-                      <span className="text-white text-3xl font-bold">
-                        {session.guestName?.charAt(0) ?? 'G'}
-                      </span>
-                    </div>
-                  )}
-                </div>
-
-                {/* Glass card */}
-                <div
-                  className="tv-widget"
-                  style={{ padding: '48px 40px 36px', paddingTop: '60px' }}
-                >
-                  <p className="text-white/70 text-base mb-1">
-                    Welcome in <span className="text-white font-medium">{session.hotelName}</span>
-                    {session.hotelLocation && `, ${session.hotelLocation}`}!
-                  </p>
-                  <p className="text-white font-bold mb-5" style={{ fontSize: '28px', fontFamily: 'var(--font-display)' }}>
-                    {session.guestName ?? 'Dear Guest'}
-                  </p>
-
-                  <div className="border-t border-white/15 mb-5" />
-
-                  <p className="text-white/75 leading-relaxed mb-3" style={{ fontSize: '16px' }}>
-                    We hope you enjoy your Trip! We always ready whenever you want,
-                    let us know what you needed.
-                  </p>
-                  <p className="text-white/75" style={{ fontSize: '16px' }}>
-                    Your comfort is our priority!
-                  </p>
-
-                  {/* Countdown progress bar */}
-                  <div className="mt-8">
-                    <div className="flex justify-between items-center mb-2">
-                      <span className="text-white/40 text-xs">Entering in {countdown}s — press Enter to skip</span>
-                      <span className="text-teal-400 text-xs">{Math.round(((5 - countdown) / 5) * 100)}%</span>
-                    </div>
-                    <div className="h-1 bg-white/10 rounded-full overflow-hidden">
-                      <motion.div
-                        className="h-full bg-teal-500 rounded-full"
-                        initial={{ width: '0%' }}
-                        animate={{ width: `${((5 - countdown) / 5) * 100}%` }}
-                        transition={{ duration: 0.9, ease: 'linear' }}
-                      />
-                    </div>
-                  </div>
-                </div>
-              </motion.div>
-            </div>
-          </motion.div>
+          <WelcomeScreen 
+            session={session} 
+            roomCode={roomCode} 
+            onFinish={handleWelcomeFinish} 
+          />
         )}
       </AnimatePresence>
     </div>

@@ -16,9 +16,12 @@ export default async function ServicesSettingsPage({ params }: { params: Promise
     .order('sort_order', { ascending: true });
 
   return (
-    <div style={{ padding: '32px', maxWidth: '1000px', margin: '0 auto' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-        <h1 style={{ fontSize: '24px', fontWeight: 700, color: '#0f172a' }}>Service Configuration</h1>
+    <div className="p-12 max-w-[1400px] mx-auto font-staff">
+      <div className="flex justify-between items-center mb-10">
+        <div>
+          <h1 className="text-3xl font-black text-slate-900 tracking-tight leading-none mb-2">Service Catalog</h1>
+          <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Guest Experience Configuration</p>
+        </div>
       </div>
       <ServicesClient hotelId={hotel.id} initialServices={services || []} />
     </div>

@@ -47,6 +47,7 @@ export interface RoomSession {
   airportIataCode: string | null;
   latitude: number | null;
   longitude: number | null;
+  customWelcomeMessage: string | null;
 }
 
 // PIN login API response

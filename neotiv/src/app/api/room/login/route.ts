@@ -85,6 +85,7 @@ export async function POST(
       airportIataCode: hotel.airport_iata_code,
       latitude: hotel.latitude,
       longitude: hotel.longitude,
+      customWelcomeMessage: room.custom_welcome_message,
     };
 
     return NextResponse.json({ session }, { status: 200 });

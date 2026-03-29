@@ -2,6 +2,8 @@ import { NextResponse, type NextRequest } from 'next/server';
 import type { WeatherData } from '@/types';
 import { getCached } from '@/lib/utils/cache';
 
+export const dynamic = 'force-dynamic';
+
 const WEATHER_ICONS: Record<string, string> = {
   '01d': '☀️', '01n': '🌙',
   '02d': '⛅', '02n': '⛅',

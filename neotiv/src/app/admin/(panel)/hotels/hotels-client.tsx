@@ -3,6 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export default function HotelsClient({ initialHotels }: { initialHotels: any[] }) {
   const [hotels, setHotels] = useState(initialHotels);
@@ -44,164 +45,176 @@ export default function HotelsClient({ initialHotels }: { initialHotels: any[] }
   };
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
-      {/* Header */}
-      <div className="p-6 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
+    <div className="bg-white rounded-[40px] border border-slate-200 shadow-xl shadow-slate-900/5 overflow-hidden font-staff">
+      {/* Platform Header */}
+      <div className="p-8 border-b border-slate-100 bg-slate-50/50 flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
-          <h2 className="text-lg font-semibold text-slate-900">Platform Hotels</h2>
-          <p className="text-slate-500 text-sm mt-1">Provision and manage all tenant properties</p>
+           <h2 className="text-lg font-black text-slate-900 tracking-tight leading-none mb-1">Instance Manifest</h2>
+           <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest">{hotels.length} Active Environments</p>
         </div>
         <button 
           onClick={() => setShowAdd(!showAdd)} 
-          className="bg-teal-600 hover:bg-teal-500 text-white px-5 py-2.5 rounded-lg text-sm font-medium transition-all shadow-sm shadow-teal-600/20 active:scale-95 flex items-center gap-2"
+          className="px-6 py-3 bg-rose-500 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-rose-500/20 hover:scale-105 active:scale-95 transition-all flex items-center gap-2"
         >
-          {showAdd ? 'Close Panel' : '+ Provision Hotel'}
+          {showAdd ? 'Close Inspector' : '+ Provision Environment'}
         </button>
       </div>
 
-      {/* Provision Form */}
-      <div className={`transition-all duration-300 overflow-hidden ${showAdd ? 'max-h-[800px] border-b border-slate-200' : 'max-h-0 border-transparent'}`}>
-        <div className="p-8 bg-slate-50/50">
-          <div className="max-w-4xl mx-auto space-y-6">
-            
-            <div className="grid grid-cols-2 gap-6">
-              <div>
-                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">Hotel Name</label>
-                <input 
-                  value={name} onChange={e => handleNameChange(e.target.value)} 
-                  placeholder="e.g. Amartha Resort" 
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-slate-900 placeholder-slate-400 focus:outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all"
-                />
+      {/* Provisioning Form */}
+      <AnimatePresence>
+        {showAdd && (
+          <motion.div 
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: 'auto' }}
+            exit={{ opacity: 0, height: 0 }}
+            className="p-10 bg-slate-50 border-b border-slate-100 overflow-hidden"
+          >
+            <div className="max-w-4xl mx-auto space-y-8">
+              <div className="grid grid-cols-2 gap-8">
+                <div>
+                  <FormLabel>Property Name</FormLabel>
+                  <FormInput value={name} onChange={handleNameChange} placeholder="e.g. Paramount Hotel" />
+                </div>
+                <div>
+                  <FormLabel>Namespace / Slug</FormLabel>
+                  <FormInput value={slug} onChange={setSlug} placeholder="paramount-hotel" />
+                  <p className="text-[9px] font-black text-slate-400 uppercase mt-2 tracking-widest">neotiv.com/<span className="text-rose-500">{slug || '...'}</span></p>
+                </div>
               </div>
-              <div>
-                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">Public URL Slug</label>
-                <input 
-                  value={slug} onChange={e => setSlug(e.target.value)} 
-                  placeholder="e.g. amartha-resort" 
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-slate-900 placeholder-slate-400 focus:outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all font-mono text-sm"
-                />
-                <p className="text-xs text-slate-500 mt-2">neotiv.com/<span className="font-semibold text-teal-600">{slug || 'hotel-slug'}</span>/dashboard</p>
-              </div>
-            </div>
 
-            <div className="grid grid-cols-2 gap-6">
-              <div>
-                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">Location</label>
-                <input 
-                  value={location} onChange={e => setLocation(e.target.value)} 
-                  placeholder="City, Country" 
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-slate-900 placeholder-slate-400 focus:outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all"
-                />
+              <div className="grid grid-cols-2 gap-8">
+                <div>
+                  <FormLabel>Geographic Location</FormLabel>
+                  <FormInput value={location} onChange={setLocation} placeholder="City, Country" />
+                </div>
+                <div>
+                  <FormLabel>Temporal Context (Timezone)</FormLabel>
+                  <select 
+                    value={timezone} onChange={e => setTimezone(e.target.value)} 
+                    className="w-full h-14 bg-white border border-slate-200 rounded-2xl px-6 text-sm font-semibold outline-none focus:ring-4 focus:ring-rose-500/10 transition-all font-staff"
+                  >
+                    <option value="UTC">Universal Coordinated Time (UTC)</option>
+                    <option value="Asia/Jakarta">Jakarta (WIB)</option>
+                    <option value="Asia/Tokyo">Tokyo (JST)</option>
+                    <option value="Europe/London">London (GMT)</option>
+                  </select>
+                </div>
               </div>
-              <div>
-                <label className="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">Timezone</label>
-                <select 
-                  value={timezone} onChange={e => setTimezone(e.target.value)} 
-                  className="w-full px-4 py-3 rounded-xl border border-slate-200 bg-white text-slate-900 focus:outline-none focus:border-teal-500 focus:ring-4 focus:ring-teal-500/10 transition-all"
+
+              <div className="p-8 bg-white rounded-[32px] border border-slate-200 shadow-sm relative overflow-hidden">
+                <div className="absolute top-0 right-0 p-4">
+                   <span className="text-[9px] font-black uppercase tracking-widest px-2 py-1 bg-slate-50 text-slate-400 rounded-md">Auth Node</span>
+                </div>
+                <h4 className="text-xs font-black text-slate-900 uppercase tracking-widest mb-6">Initial Administrative Credentials</h4>
+                <div className="grid grid-cols-2 gap-8">
+                  <div>
+                    <FormLabel>Root Admin Email</FormLabel>
+                    <FormInput type="email" value={adminEmail} onChange={setAdminEmail} placeholder="manager@property.com" />
+                  </div>
+                  <div>
+                    <FormLabel>Secure Passkey</FormLabel>
+                    <FormInput value={adminPassword} onChange={setAdminPassword} placeholder="••••••••" />
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex gap-4">
+                <button 
+                  onClick={handleCreate} disabled={loading}
+                  className="flex-1 h-14 bg-slate-900 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-slate-900/10 hover:scale-[1.02] active:scale-95 transition-all"
                 >
-                  <option value="UTC">UTC</option>
-                  <option value="Asia/Jakarta">Asia/Jakarta (WIB)</option>
-                  <option value="Asia/Tokyo">Asia/Tokyo (JST)</option>
-                  <option value="Europe/London">Europe/London (GMT)</option>
-                  <option value="America/New_York">America/New_York (EST)</option>
-                </select>
+                  {loading ? 'Initializing Instance...' : 'Deploy Environment ✓'}
+                </button>
+                <button 
+                  onClick={() => setShowAdd(false)}
+                  className="px-10 h-14 bg-white border border-slate-200 text-slate-400 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:text-slate-900 transition-colors"
+                >
+                  Cancel
+                </button>
               </div>
             </div>
+          </motion.div>
+        )}
+      </AnimatePresence>
 
-            {/* Optional initial admin */}
-            <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm mt-4">
-              <h4 className="text-sm font-semibold text-slate-800 mb-4 flex items-center gap-2">
-                Manager Credentials
-                <span className="bg-slate-100 text-slate-500 text-[10px] px-2 py-0.5 rounded-full uppercase tracking-wider font-bold">Optional</span>
-              </h4>
-              <div className="grid grid-cols-2 gap-6">
-                <div>
-                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">Initial Admin Email</label>
-                  <input 
-                    type="email" value={adminEmail} onChange={e => setAdminEmail(e.target.value)} 
-                    placeholder="manager@resort.com" 
-                    className="w-full px-4 py-2.5 rounded-lg border border-slate-200 bg-slate-50 text-slate-900 placeholder-slate-400 focus:bg-white focus:outline-none focus:border-teal-500 transition-all"
-                  />
-                </div>
-                <div>
-                  <label className="block text-xs font-bold text-slate-500 uppercase tracking-wide mb-2">Initial Password</label>
-                  <input 
-                    type="text" value={adminPassword} onChange={e => setAdminPassword(e.target.value)} 
-                    placeholder="Secure password" 
-                    className="w-full px-4 py-2.5 rounded-lg border border-slate-200 bg-slate-50 text-slate-900 placeholder-slate-400 focus:bg-white focus:outline-none focus:border-teal-500 transition-all"
-                  />
-                  <p className="text-[11px] text-slate-500 mt-2">Provides immediate Front-Office access.</p>
-                </div>
-              </div>
-            </div>
-
-            <div className="flex gap-3 pt-4">
-              <button 
-                onClick={handleCreate} disabled={loading}
-                className="bg-slate-900 hover:bg-black text-white px-6 py-3 rounded-xl font-medium transition-all shadow-md active:scale-95 flex-1 max-w-[200px] flex justify-center items-center"
-              >
-                {loading ? 'Provisioning...' : 'Provision Hotel'}
-              </button>
-              <button 
-                onClick={() => setShowAdd(false)} disabled={loading}
-                className="bg-white hover:bg-slate-50 text-slate-700 border border-slate-200 px-6 py-3 rounded-xl font-medium transition-all active:scale-95"
-              >
-                Cancel
-              </button>
-            </div>
-
-          </div>
-        </div>
+      {/* Instance Table */}
+      <div className="overflow-x-auto">
+        <table className="w-full text-left border-collapse">
+          <thead>
+            <tr className="bg-slate-50/50 text-[10px] font-black uppercase tracking-widest text-slate-400 border-b border-slate-100">
+              <th className="px-10 py-6">Identity & Namespace</th>
+              <th className="px-10 py-6">Operational Scale</th>
+              <th className="px-10 py-6">Lifecycle Status</th>
+              <th className="px-10 py-6 text-right">Instance Commands</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-slate-50">
+            {hotels.map(h => (
+              <tr key={h.id} className="group hover:bg-slate-50/50 transition-colors">
+                <td className="px-10 py-8">
+                  <div className="font-black text-slate-900 leading-none mb-1.5">{h.name}</div>
+                  <div className="text-[10px] font-black text-slate-400 uppercase tracking-widest group-hover:text-rose-500 transition-colors">/{h.slug}</div>
+                </td>
+                <td className="px-10 py-8">
+                  <div className="flex items-center gap-6">
+                    <div className="flex flex-col">
+                       <span className="text-[10px] font-black uppercase tracking-widest text-slate-300">Units</span>
+                       <span className="text-sm font-black text-slate-900 leading-none mt-1">{h.room_count}</span>
+                    </div>
+                    <div className="flex flex-col">
+                       <span className="text-[10px] font-black uppercase tracking-widest text-slate-300">Personnel</span>
+                       <span className="text-sm font-black text-slate-900 leading-none mt-1">{h.staff_count}</span>
+                    </div>
+                  </div>
+                </td>
+                <td className="px-10 py-8">
+                  <div className={`inline-flex items-center gap-2 px-3 py-1.5 rounded-full border-2 ${
+                    h.is_active 
+                      ? 'border-emerald-500/20 bg-emerald-50 text-emerald-700' 
+                      : 'border-slate-100 bg-slate-50 text-slate-400'
+                  }`}>
+                    <span className={`w-1.5 h-1.5 rounded-full ${h.is_active ? 'bg-emerald-500' : 'bg-slate-300'}`} />
+                    <span className="text-[10px] font-black uppercase tracking-widest">
+                      {h.is_active ? 'Production' : 'Suspended'}
+                    </span>
+                  </div>
+                </td>
+                <td className="px-10 py-8 text-right">
+                  <Link 
+                    href={`/admin/hotels/${h.id}`} 
+                    className="inline-flex items-center justify-center px-6 py-3 bg-white border border-slate-200 text-slate-400 rounded-xl font-black text-[10px] uppercase tracking-widest group-hover:border-slate-900 group-hover:text-slate-900 transition-all hover:shadow-lg active:scale-95"
+                  >
+                    Enter Console &rarr;
+                  </Link>
+                </td>
+              </tr>
+            ))}
+            {hotels.length === 0 && (
+              <tr>
+                <td colSpan={4} className="px-10 py-32 text-center text-slate-400 font-bold italic">
+                   No properties found in global namespace.
+                </td>
+              </tr>
+            )}
+          </tbody>
+        </table>
       </div>
-
-      {/* Table */}
-      <table className="w-full text-left border-collapse">
-        <thead className="bg-white border-b border-slate-100 text-xs uppercase tracking-wider text-slate-500 font-semibold">
-          <tr>
-            <th className="px-6 py-4">Property</th>
-            <th className="px-6 py-4">Operations</th>
-            <th className="px-6 py-4">Status</th>
-            <th className="px-6 py-4 text-right">Actions</th>
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-slate-100">
-          {hotels.map(h => (
-            <tr key={h.id} className="hover:bg-slate-50/80 transition-colors group">
-              <td className="px-6 py-4">
-                <div className="font-semibold text-slate-900">{h.name}</div>
-                <div className="text-slate-500 text-sm mt-0.5 font-mono">/{h.slug}</div>
-              </td>
-              <td className="px-6 py-4">
-                <div className="flex items-center gap-4 text-sm text-slate-600">
-                  <span title="Active Rooms">🚪 {h.room_count}</span>
-                  <span title="Staff Members">🧑‍💼 {h.staff_count}</span>
-                </div>
-              </td>
-              <td className="px-6 py-4">
-                <span className={`inline-flex px-2.5 py-1 rounded-full text-xs font-bold ${h.is_active ? 'bg-teal-50 text-teal-700 ring-1 ring-teal-600/20' : 'bg-slate-100 text-slate-500 ring-1 ring-slate-400/20'}`}>
-                  {h.is_active ? 'Active' : 'Suspended'}
-                </span>
-              </td>
-              <td className="px-6 py-4 text-right">
-                <Link 
-                  href={`/admin/hotels/${h.id}`} 
-                  className="text-teal-600 hover:text-teal-700 font-medium text-sm transition-colors py-2 px-4 rounded-lg hover:bg-teal-50 opacity-80 group-hover:opacity-100"
-                >
-                  Manage Instance &rarr;
-                </Link>
-              </td>
-            </tr>
-          ))}
-          {hotels.length === 0 && (
-            <tr>
-              <td colSpan={4} className="px-6 py-12 text-center text-slate-500">
-                <div className="w-16 h-16 bg-slate-100 rounded-full flex items-center justify-center mx-auto mb-3 text-2xl">🏨</div>
-                <p>No properties provisioned on this platform.</p>
-              </td>
-            </tr>
-          )}
-        </tbody>
-      </table>
     </div>
+  );
+}
+
+function FormLabel({ children }: { children: React.ReactNode }) {
+  return <label className="block mb-2 text-[10px] font-black uppercase tracking-widest text-slate-400">{children}</label>;
+}
+
+function FormInput({ value, onChange, placeholder, type = 'text' }: { value: string; onChange: (val: string) => void; placeholder?: string; type?: string }) {
+  return (
+    <input 
+      type={type}
+      value={value} 
+      onChange={e => onChange(e.target.value)} 
+      placeholder={placeholder}
+      className="w-full h-14 bg-white border border-slate-200 rounded-2xl px-6 text-sm font-semibold outline-none focus:ring-4 focus:ring-rose-500/10 focus:border-rose-500 transition-all font-staff" 
+    />
   );
 }

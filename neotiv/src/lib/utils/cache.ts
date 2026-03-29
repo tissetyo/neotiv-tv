@@ -1,10 +1,13 @@
 import { Redis } from '@upstash/redis';
 
-// Graceful fallback for environments missing the Upstash tokens
-export const redis = process.env.UPSTASH_REDIS_REST_URL && process.env.UPSTASH_REDIS_REST_TOKEN
+const redisUrl = process.env.UPSTASH_REDIS_REST_URL;
+const redisToken = process.env.UPSTASH_REDIS_REST_TOKEN;
+
+// Graceful fallback for environments missing the Upstash tokens or using placeholders
+export const redis = redisUrl && redisUrl.startsWith('https://') && !redisUrl.includes('YOUR_UPSTASH') && redisToken
   ? new Redis({
-      url: process.env.UPSTASH_REDIS_REST_URL,
-      token: process.env.UPSTASH_REDIS_REST_TOKEN,
+      url: redisUrl,
+      token: redisToken,
     })
   : null;
 

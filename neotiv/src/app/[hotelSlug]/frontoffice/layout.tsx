@@ -31,7 +31,7 @@ export default async function FrontOfficeLayout({
     .single();
 
   return (
-    <div className="flex min-h-screen bg-slate-50 font-sans">
+    <div className="flex min-h-screen bg-slate-50 font-staff">
       <ManagerSidebar 
         hotelSlug={hotelSlug} 
         hotelName={hotel?.name ?? hotelSlug} 
@@ -39,15 +39,20 @@ export default async function FrontOfficeLayout({
       />
 
       <main className="flex-1 ml-[260px] min-h-screen relative">
-        <header className="bg-white/80 backdrop-blur-md border-b border-slate-200 px-8 h-16 flex items-center justify-between sticky top-0 z-50">
-          <div className="flex items-center gap-2">
-            <span className="w-2 h-2 rounded-full bg-teal-500 animate-pulse" />
-            <span className="text-xs font-bold text-slate-400 uppercase tracking-widest">Live Operations</span>
+        <header className="bg-white/90 backdrop-blur-md border-b border-slate-200 px-10 h-20 flex items-center justify-between sticky top-0 z-50">
+          <div className="flex items-center gap-3">
+            <div className="flex items-center gap-2 px-3 py-1.5 bg-teal-500/10 rounded-full border border-teal-500/20">
+              <span className="w-2 h-2 rounded-full bg-teal-500 animate-pulse" />
+              <span className="text-[10px] font-black text-teal-700 uppercase tracking-widest">Live Operations</span>
+            </div>
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-6">
             <div className="text-right">
               <p className="text-sm font-bold text-slate-900 leading-none">{user.user_metadata?.name || 'Authorized Staff'}</p>
-              <p className="text-[10px] text-slate-500 font-medium mt-1 uppercase tracking-wider">{user.email}</p>
+              <p className="text-[10px] text-slate-500 font-bold mt-1.5 uppercase tracking-widest opacity-60">{user.email}</p>
+            </div>
+            <div className="w-10 h-10 rounded-xl bg-slate-100 border border-slate-200 flex items-center justify-center text-slate-400 font-bold overflow-hidden">
+               {user.user_metadata?.name?.charAt(0) || user.email?.charAt(0).toUpperCase()}
             </div>
           </div>
         </header>

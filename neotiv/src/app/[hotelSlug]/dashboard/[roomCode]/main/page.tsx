@@ -1,197 +1,193 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, use } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useRoomStore } from '@/stores/roomStore';
+import { useDpadNavigation } from '@/lib/hooks/useDpadNavigation';
+
+// Components
+import DigitalClock from '@/components/tv/DigitalClock';
+import AnalogClocks from '@/components/tv/AnalogClocks';
+import GuestCard from '@/components/tv/GuestCard';
+import WifiCard from '@/components/tv/WifiCard';
 import FlightSchedule from '@/components/tv/FlightSchedule';
+import { NotificationCard, HotelDeals } from '@/components/tv/InfoWidgets';
+import HotelService from '@/components/tv/HotelService';
+import HotelInfo from '@/components/tv/HotelInfo';
 import MapWidget from '@/components/tv/MapWidget';
+import AppGrid from '@/components/tv/AppGrid';
+import MarqueeBar from '@/components/tv/MarqueeBar';
 import AppLauncher from '@/components/tv/AppLauncher';
-import type { AppConfig } from '@/components/tv/AppLauncher';
-import ConnectionStatus from '@/components/tv/ConnectionStatus';
-import Image from 'next/image';
+import DashboardSync from '@/components/tv/DashboardSync';
+import ChatModal from '@/components/tv/ChatModal';
+import AlarmModal from '@/components/tv/AlarmModal';
+import { useRealtime } from '@/lib/hooks/useRealtime';
 
 export default function MainDashboardPage() {
   const router = useRouter();
   const params = useParams<{ hotelSlug: string; roomCode: string }>();
   const { hotelSlug, roomCode } = params;
   const store = useRoomStore();
+  const { registerElement } = useDpadNavigation();
 
-  const [currentTime, setCurrentTime] = useState<Date>(new Date());
-  const [activeApp, setActiveApp] = useState<AppConfig | null>(null);
+  const [activeApp, setActiveApp] = useState<any>(null);
+  const [modal, setModal] = useState<'chat' | 'alarm' | 'notifications' | null>(null);
 
+  // Sync Data
+  useRealtime(store.hotelId, store.roomId);
+
+  // Security Check
   useEffect(() => {
     const key = `neotiv_room_${hotelSlug}_${roomCode}`;
     const stored = localStorage.getItem(key);
     if (!stored) {
       router.replace(`/${hotelSlug}/dashboard/${roomCode}`);
     }
-
-    const timer = setInterval(() => setCurrentTime(new Date()), 1000);
-    return () => clearInterval(timer);
   }, [hotelSlug, roomCode, router]);
 
-  const handleLaunchApp = (service: any) => {
-    setActiveApp({
-      id: service.id,
-      name: service.name,
-      url: service.url || 'https://neotiv.com', // placeholder if none
-      mode: service.mode || 'tv-dispatch',
-      icon: service.icon || '📱',
-      color: service.color || '#14b8a6'
-    });
+  const handleLaunchApp = (id: string) => {
+    if (['chat', 'alarm', 'notifications'].includes(id)) {
+       setModal(id as any);
+    } else {
+       setActiveApp({ id, name: id.toUpperCase(), mode: 'tv-dispatch' });
+    }
   };
 
-  const timeFormatter = new Intl.DateTimeFormat('en-US', {
-    timeZone: store.hotelTimezone || 'UTC',
-    hour: 'numeric',
-    minute: '2-digit',
-    hour12: true,
-  });
-
-  const dateFormatter = new Intl.DateTimeFormat('en-US', {
-    timeZone: store.hotelTimezone || 'UTC',
-    weekday: 'long',
-    month: 'short',
-    day: 'numeric',
-  });
-
-  // Safe defaults if services aren't populated
-  const displayServices = store.services && store.services.length > 0 
-    ? store.services 
-    : [
-        { id: '1', name: 'Room Service', icon: '🍽️', color: '#14b8a6', mode: 'qr-fallback', url: `https://neotiv.com/order/${roomCode}` },
-        { id: '2', name: 'Smart Home', icon: '💡', color: '#f59e0b', mode: 'tv-dispatch' },
-        { id: '3', name: 'Front Desk', icon: '🛎️', color: '#3b82f6', mode: 'qr-fallback', url: `https://wa.me/something` }
-      ];
-
   return (
-    <div
-      className="fixed inset-0 overflow-hidden flex flex-col bg-slate-900"
-      style={{
-        width: '100vw',
-        height: '100vh',
-        background: store.backgroundUrl 
-          ? `linear-gradient(to right, rgba(15,23,42,0.9) 0%, rgba(15,23,42,0.4) 100%), url(${store.backgroundUrl})`
-          : 'linear-gradient(135deg, #0f4c6e 0%, #1a7a6e 40%, #0f172a 100%)',
-        backgroundSize: 'cover',
-        backgroundPosition: 'center'
-      }}
+    <div 
+      className="fixed inset-0 bg-slate-950 overflow-hidden text-white"
+      style={{ width: '1920px', height: '1080px' }}
     >
-      {/* Top HUD */}
-      <div className="w-full h-24 flex items-center justify-between px-12 pt-6 shrink-0 z-10 hidden sm:flex">
-        <div className="flex items-center gap-6">
-          <div className="w-14 h-14 rounded-full bg-teal-500/20 border border-teal-500/30 flex items-center justify-center shadow-[0_0_20px_rgba(20,184,166,0.2)]">
-            <span className="text-teal-400 text-2xl font-bold font-display">N</span>
-          </div>
-          <div>
-            <h1 className="text-white text-3xl font-display font-bold mix-blend-screen">{store.hotelName || 'Neotiv Hotel'}</h1>
-            <p className="text-white/60 tracking-wider text-sm font-medium uppercase mt-0.5">Room {roomCode}</p>
-          </div>
-        </div>
+      {/* Background with Vignette Overlay */}
+      <div 
+        className="absolute inset-0 bg-cover bg-center transition-all duration-1000"
+        style={{ 
+          backgroundImage: store.backgroundUrl 
+            ? `url(${store.backgroundUrl})` 
+            : 'linear-gradient(135deg, #0f172a 0%, #1e293b 100%)'
+        }}
+      />
+      <div className="absolute inset-0 bg-gradient-to-t from-slate-950 via-slate-950/40 to-slate-950/80" />
+      <div className="absolute inset-0 bg-[radial-gradient(circle_at_center,transparent_0%,rgba(15,23,42,0.6)_100%)]" />
 
-        <div className="flex items-center gap-8">
-          <ConnectionStatus />
-          <div className="text-right">
-            <div className="text-4xl text-white font-bold tracking-tight font-display drop-shadow-md">
-              {timeFormatter.format(currentTime)}
-            </div>
-            <div className="text-white/70 text-sm tracking-widest uppercase font-medium mt-1">
-              {dateFormatter.format(currentTime)}
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Main Grid Payload */}
-      <div className="flex-1 w-full h-full p-12 grid grid-cols-12 gap-8 z-10 relative">
+      {/* Main Grid Layout (24px padding) */}
+      <div className="absolute inset-0 p-8 grid grid-cols-[480px_1fr_400px] grid-rows-[220px_1fr_260px_48px] gap-6">
         
-        {/* Left Nav Apps (Span 4) */}
-        <div className="col-span-4 h-full flex flex-col gap-6">
-          <div className="tv-widget bg-slate-900/60 flex-1 flex flex-col border border-white/10 shadow-2xl rounded-3xl p-8 backdrop-blur-xl">
-            <div className="mb-8">
-               <h2 className="text-white font-display text-3xl font-bold">Discover</h2>
-               <p className="text-teal-400 font-medium text-sm mt-1 uppercase tracking-widest">Available Services</p>
-            </div>
-            
-            <div className="flex flex-col gap-4 flex-1">
-              {displayServices.map((s, idx) => {
-                const service = s as any;
-                return (
-                  <button
-                    key={service.id || idx}
-                    className="tv-focusable flex items-center gap-6 w-full p-5 rounded-2xl border border-white/5 bg-white/5 hover:bg-white/15 transition-all outline-none"
-                    onClick={() => handleLaunchApp(service)}
-                  >
-                    <div 
-                      className="w-16 h-16 rounded-2xl flex items-center justify-center text-3xl shadow-lg border border-white/10" 
-                      style={{ background: `linear-gradient(135deg, ${service.color || '#14b8a6'}40, transparent)` }}
-                    >
-                      {service.icon || '✨'}
-                    </div>
-                    <div className="text-left flex-1">
-                      <h3 className="text-white text-xl font-bold font-display">{service.name}</h3>
-                      <p className="text-white/50 text-sm mt-1 flex items-center gap-2">
-                         {service.mode === 'qr-fallback' ? 'Mobile Context' : 'Native Engagement'}
-                      </p>
-                    </div>
-                  </button>
-                );
-              })}
-            </div>
-
-            {/* Guest Summary block embedded in sidebar bottom */}
-            <div className="mt-8 border-t border-white/10 pt-6 flex items-center gap-5">
-              {store.guestPhotoUrl ? (
-                <Image src={store.guestPhotoUrl} alt="Guest" width={48} height={48} className="w-12 h-12 rounded-full border-2 border-white/20" />
-              ) : (
-                <div className="w-12 h-12 rounded-full bg-slate-800 flex items-center justify-center text-white/50 border border-white/10 uppercase font-bold">
-                  {store.guestName?.charAt(0) || 'G'}
-                </div>
-              )}
-              <div>
-                <p className="text-white font-semibold">{store.guestName || 'Valued Guest'}</p>
-                <p className="text-white/40 text-xs">Comfort is our priority.</p>
-              </div>
-            </div>
-          </div>
+        {/* ROW 1: Clocks | Empty | Identity */}
+        <div className="flex flex-col justify-between">
+           <div className="flex flex-col gap-4">
+              <DigitalClock 
+                timezone={store.hotelTimezone} 
+                location={store.hotelLocation ?? undefined} 
+              />
+           </div>
+           <AnalogClocks 
+             tz1={store.getClockTimezones()[0]} label1={store.getClockLabels()[0]}
+             tz2={store.getClockTimezones()[1]} label2={store.getClockLabels()[1]}
+             tz3={store.getClockTimezones()[2]} label3={store.getClockLabels()[2]}
+           />
+        </div>
+        
+        <div className="flex items-center justify-center">
+           {/* Center Background View */}
         </div>
 
-        {/* Right Info Panels (Span 8) */}
-        <div className="col-span-8 h-full flex flex-col gap-8">
-           {/* Flight Radar Row */}
-           <motion.div 
-             initial={{ y: 20, opacity: 0 }} 
-             animate={{ y: 0, opacity: 1 }} 
-             transition={{ delay: 0.2 }} 
-             className="h-1/2 rounded-3xl overflow-hidden shadow-2xl relative tv-focusable ring-rose-500/20"
-             tabIndex={0}
-           >
-              <div className="absolute inset-0 bg-slate-900/60 backdrop-blur-xl border border-white/10 rounded-3xl" />
-              <div className="relative z-10 h-full p-2">
-                 <FlightSchedule />
+        <div className="flex flex-col justify-between items-end">
+           <GuestCard 
+             guestName={store.guestName || 'Stephen Hawk'} 
+             roomCode={roomCode} 
+             photoUrl={store.guestPhotoUrl} 
+           />
+           <WifiCard 
+             ssid={store.wifiSsid || 'HotelABC'} 
+             password={store.wifiPassword ?? undefined} 
+             username={store.wifiUsername ?? 'Guest'}
+           />
+        </div>
+
+        {/* ROW 2: Flight Schedule | Empty | Notification Area */}
+        <div className="row-span-1 min-h-0">
+           <FlightSchedule airportCode={store.airportIataCode || 'DPS'} />
+        </div>
+
+        <div className="relative">
+           {/* Dynamic Center Backdrop */}
+        </div>
+
+        <div className="flex flex-col justify-end">
+           <NotificationCard 
+             title="Title Notification" 
+             body="Lorem ipsum dolor sit amet consectetur. Scelerisque ipsum nisi elementum elementum faucibus etiam nunc turpis."
+             time="10:08 AM, 26 March 2026"
+             onSelect={() => setModal('notifications')}
+           />
+        </div>
+
+        {/* ROW 3: Action Center | Map | Apps Grid */}
+        <div className="flex flex-col gap-4">
+           {/* Hotel Info & Services Side by Side */}
+           <div className="grid grid-cols-2 gap-4 h-full">
+              <HotelInfo 
+                hotelName={store.hotelName || 'Neotiv Hotel'} 
+                roomCode={roomCode} 
+              />
+              <div className="tv-widget bg-slate-900/60 backdrop-blur-2xl border-white/10 p-5 flex flex-col gap-4">
+                 <HotelService 
+                   services={store.services.map(s => ({ ...s, icon: s.icon || '🛎️' }))} 
+                   onSelect={(s) => console.log('Select Service', s)} 
+                 />
               </div>
-           </motion.div>
+           </div>
            
-           {/* Dynamic Environment Row */}
-           <motion.div initial={{ y: 20, opacity: 0 }} animate={{ y: 0, opacity: 1 }} transition={{ delay: 0.4 }} className="h-1/2 flex items-center justify-center rounded-3xl overflow-hidden shadow-2xl bg-black/40 border border-white/10 relative">
-              {store.latitude && store.longitude ? (
-                 <MapWidget locationString={store.hotelLocation || store.hotelName || 'Local Area'} latitude={store.latitude} longitude={store.longitude} />
-              ) : (
-                <div className="flex flex-col w-full h-full items-center justify-center bg-slate-900/80 backdrop-blur-md">
-                   <div className="w-24 h-24 bg-teal-500/20 rounded-full flex items-center justify-center text-teal-400 mb-6 border border-teal-500/30">
-                      🌤️
-                   </div>
-                   <h2 className="text-white text-3xl font-display font-bold">Resort Map Unavailable</h2>
-                   <p className="text-white/50 mt-2">Geographical coordinates are not configured for this instance.</p>
-                </div>
-              )}
-           </motion.div>
+           {/* Deals Area at Bottom Left Column */}
+           <div className="tv-widget bg-slate-900/60 backdrop-blur-2xl border-white/10 p-5">
+              <HotelDeals 
+                promos={store.promos.map(p => ({ ...p, poster_url: p.poster_url || '' }))} 
+                onSelect={(p) => console.log('Select Promo', p)} 
+              />
+           </div>
+        </div>
+
+        <div className="relative rounded-3xl overflow-hidden shadow-2xl border border-white/10">
+           <MapWidget 
+             locationString={store.hotelLocation || 'Local Area'} 
+             latitude={store.latitude ?? undefined} 
+             longitude={store.longitude ?? undefined} 
+           />
+        </div>
+
+        <div className="tv-widget bg-slate-900/60 backdrop-blur-2xl border-white/10 p-4">
+           <AppGrid onLaunch={handleLaunchApp} />
+        </div>
+
+        {/* ROW 4: Marquee */}
+        <div className="col-span-3 -mx-8">
+           <MarqueeBar announcements={store.announcements || []} />
         </div>
       </div>
 
-      {/* Layer Apps Over The Grid */}
+      {/* Overlay Modals & Launchers */}
+      <DashboardSync hotelId={store.hotelId || ''} roomId={store.roomId || ''} />
       <AppLauncher app={activeApp} onClose={() => setActiveApp(null)} />
+      
+      <AnimatePresence>
+        {modal === 'chat' && (
+          <ChatModal 
+            hotelId={store.hotelId || ''} 
+            roomId={store.roomId || ''} 
+            guestName={store.guestName || 'Guest'}
+            onClose={() => setModal(null)} 
+          />
+        )}
+        {modal === 'alarm' && (
+          <AlarmModal 
+            hotelId={store.hotelId || ''} 
+            roomId={store.roomId || ''} 
+            onClose={() => setModal(null)} 
+          />
+        )}
+      </AnimatePresence>
     </div>
   );
 }

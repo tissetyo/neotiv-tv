@@ -1,5 +1,5 @@
-@import "tailwindcss";
 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;700&family=DM+Sans:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap');
+@import "tailwindcss";
 
 :root {
   /* Brand Colors */
@@ -103,15 +103,17 @@ body {
 .tv-font-display { font-family: var(--font-display); }
 .tv-font-body { font-family: var(--font-body); }
 .tv-text-hero { font-size: var(--text-hero); line-height: 1; font-family: var(--font-display); }
-.tv-text-3xl { font-size: var(--text-3xl); }
-.tv-text-2xl { font-size: var(--text-2xl); }
-.tv-text-xl { font-size: var(--text-xl); }
-.tv-text-lg { font-size: var(--text-lg); }
+.tv-text-3xl { font-size: var(--text-3xl); font-family: var(--font-display); line-height: 1.1; }
+.tv-text-2xl { font-size: var(--text-2xl); font-family: var(--font-display); font-weight: 700; }
+.tv-text-xl { font-size: var(--text-xl); font-weight: 700; }
+.tv-text-lg { font-size: var(--text-lg); font-weight: 600; }
 .tv-text-base { font-size: var(--text-base); }
 .tv-text-sm { font-size: var(--text-sm); }
 .tv-text-xs { font-size: var(--text-xs); }
-.tv-text-muted { color: rgba(255, 255, 255, 0.6); }
+.tv-text-muted { color: rgba(255, 255, 255, 0.5); }
 .tv-font-bold { font-weight: 700; }
+.tv-tracking-tight { letter-spacing: -0.02em; }
+.tv-tracking-widest { letter-spacing: 0.15em; }
 
 /* ==========================================
    STATUS BADGES (TV)

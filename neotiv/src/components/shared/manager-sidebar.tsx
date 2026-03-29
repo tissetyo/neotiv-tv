@@ -22,8 +22,8 @@ export default function ManagerSidebar({
     { icon: '🔔', label: 'Alerts', href: `/${hotelSlug}/frontoffice/notifications` },
     { icon: '💬', label: 'Guest Chat', href: `/${hotelSlug}/frontoffice/chat` },
     { icon: '⏰', label: 'Alarms', href: `/${hotelSlug}/frontoffice/alarms` },
-    { icon: '🛎', label: 'Requests', href: `/${hotelSlug}/frontoffice/service-requests` },
-    { icon: '🎟', label: 'Promos', href: `/${hotelSlug}/frontoffice/promos` },
+    { icon: '🛎️', label: 'Requests', href: `/${hotelSlug}/frontoffice/service-requests` },
+    { icon: '🎟️', label: 'Promos', href: `/${hotelSlug}/frontoffice/promos` },
   ];
 
   const managerItems = [
@@ -35,7 +35,7 @@ export default function ManagerSidebar({
   ];
 
   return (
-    <aside className="w-[260px] bg-slate-950 min-h-screen flex flex-col fixed top-0 left-0 h-full z-50 border-r border-white/5">
+    <aside className="w-[260px] bg-slate-950 flex flex-col fixed top-0 left-0 h-full z-50 border-r border-white/5 font-staff">
       {/* Brand Section */}
       <div className="p-8 pb-10 flex items-center gap-4">
         <div className="w-10 h-10 bg-teal-500 rounded-xl flex items-center justify-center text-white font-black text-xl shadow-lg shadow-teal-500/20">
@@ -48,7 +48,7 @@ export default function ManagerSidebar({
       </div>
 
       {/* Nav Section */}
-      <nav className="flex-1 px-4 space-y-1.5 overflow-y-auto custom-scrollbar">
+      <nav className="flex-1 px-4 space-y-1 overflow-y-auto custom-scrollbar">
         {navItems.map((item) => (
           <NavLink key={item.href} {...item} isActive={pathname === item.href} />
         ))}
@@ -58,7 +58,7 @@ export default function ManagerSidebar({
             <div className="px-4 mb-3">
               <p className="text-[10px] font-black uppercase tracking-[0.2em] text-slate-600">Property Management</p>
             </div>
-            <div className="space-y-1.5">
+            <div className="space-y-1">
               {managerItems.map((item) => (
                 <NavLink key={item.href} {...item} isActive={pathname === item.href} />
               ))}
@@ -97,7 +97,7 @@ function NavLink({
   return (
     <Link
       href={href}
-      className={`flex items-center gap-3.5 px-4 py-3.5 rounded-2xl transition-all duration-200 group relative ${
+      className={`flex items-center gap-3.5 px-4 py-3 rounded-2xl transition-all duration-200 group relative ${
         isActive 
           ? 'bg-teal-500 text-white shadow-lg shadow-teal-500/20' 
           : 'text-slate-400 hover:text-white hover:bg-white/5'
@@ -106,9 +106,9 @@ function NavLink({
       <span className={`text-xl transition-transform duration-300 ${isActive ? 'scale-110' : 'group-hover:scale-110'}`}>
         {icon}
       </span>
-      <span className="font-semibold text-sm tracking-wide">{label}</span>
+      <span className="font-semibold text-[13px] tracking-wide">{label}</span>
       {isActive && (
-        <div className="absolute left-0 w-1 h-6 bg-white rounded-r-full" />
+        <div className="absolute left-0 w-1.5 h-6 bg-white rounded-r-full" />
       )}
     </Link>
   );

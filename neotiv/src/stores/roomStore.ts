@@ -10,6 +10,10 @@ interface RoomState extends RoomSession {
   announcements: Announcement[];
   unreadChatCount: number;
 
+  // Helpers for easier access
+  getClockTimezones: () => string[];
+  getClockLabels: () => string[];
+
   // Actions
   hydrate: (session: RoomSession) => void;
   setPromos: (promos: Promo[]) => void;
@@ -44,17 +48,29 @@ const defaultSession: RoomSession = {
   airportIataCode: null,
   latitude: null,
   longitude: null,
+  customWelcomeMessage: null,
 };
 
 export const useRoomStore = create<RoomState>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       ...defaultSession,
       latestNotification: null,
       promos: [],
       services: [],
       announcements: [],
       unreadChatCount: 0,
+
+      getClockTimezones: () => [
+        get().clockTimezone1,
+        get().clockTimezone2,
+        get().clockTimezone3
+      ],
+      getClockLabels: () => [
+        get().clockLabel1,
+        get().clockLabel2,
+        get().clockLabel3
+      ],
 
       hydrate: (session) => set(session),
       setPromos: (promos) => set({ promos }),
@@ -90,6 +106,7 @@ export const useRoomStore = create<RoomState>()(
         airportIataCode: state.airportIataCode,
         latitude: state.latitude,
         longitude: state.longitude,
+        customWelcomeMessage: state.customWelcomeMessage,
         services: state.services,
         announcements: state.announcements,
       }),

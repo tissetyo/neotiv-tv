@@ -1,81 +1,90 @@
 'use client';
 
-import useSWR from 'swr';
-import React from 'react';
+import { useEffect, useState, useRef } from 'react';
 
-const fetcher = (url: string) => fetch(url).then(res => res.json());
-
-export function FlightScheduleSkeleton() {
-  return (
-    <div className="tv-widget p-6 flex flex-col h-full w-full">
-      <div className="flex justify-between items-center mb-4">
-        <h3 className="tv-text-xl font-bold bg-white/10 text-transparent animate-pulse rounded w-32 h-6"></h3>
-      </div>
-      <div className="flex-1 space-y-3">
-        {[1, 2, 3, 4, 5].map(i => (
-          <div key={i} className="animate-pulse flex items-center justify-between p-4 bg-white/5 rounded-xl border border-white/10">
-            <div className="w-16 h-5 bg-white/20 rounded-md"></div>
-            <div className="w-24 h-6 bg-white/20 rounded-md"></div>
-            <div className="w-12 h-5 bg-white/20 rounded-md"></div>
-          </div>
-        ))}
-      </div>
-    </div>
-  );
+interface Flight {
+  id: string;
+  code: string;
+  time: string;
+  destination: string;
+  gate: string;
+  status: 'last_call' | 'closed' | 'on_schedule' | 'gate_open' | 'delay' | 'check_in';
+  remarks: string;
 }
 
-export default function FlightSchedule({ airport = 'DPS' }: { airport?: string }) {
-  const { data: flights, error } = useSWR(`/api/flights?airport=${airport}&type=departure`, fetcher, {
-    refreshInterval: 300000, // 5 mins
-  });
+const mockFlights: Flight[] = [
+  { id: '1', code: 'GA-421', time: '18:45', destination: 'Jakarta', gate: 'B12', status: 'on_schedule', remarks: 'ON SCHEDULE' },
+  { id: '2', code: 'SQ-938', time: '19:10', destination: 'Singapore', gate: 'A05', status: 'check_in', remarks: 'CHECK-IN' },
+  { id: '3', code: 'QF-044', time: '19:35', destination: 'Sydney', gate: 'C22', status: 'gate_open', remarks: 'GATE OPEN' },
+  { id: '4', code: 'EK-451', time: '20:05', destination: 'Dubai', gate: 'B11', status: 'delay', remarks: 'DELAY 20M' },
+  { id: '5', code: 'KL-835', time: '20:30', destination: 'Amsterdam', gate: 'A08', status: 'last_call', remarks: 'LAST CALL' },
+  { id: '6', code: 'CX-784', time: '20:55', destination: 'Hong Kong', gate: 'B04', status: 'on_schedule', remarks: 'ON SCHEDULE' },
+  { id: '7', code: 'JL-728', time: '21:15', destination: 'Tokyo', gate: 'C10', status: 'check_in', remarks: 'CHECK-IN' },
+  { id: '8', code: 'TR-285', time: '21:40', destination: 'Singapore', gate: 'A02', status: 'on_schedule', remarks: 'ON SCHEDULE' },
+];
 
-  if (error) return (
-    <div className="tv-widget p-6 flex items-center justify-center">
-      <p className="tv-text-muted">Unable to load flight data.</p>
-    </div>
-  );
-
-  if (!flights) return <FlightScheduleSkeleton />;
+export default function FlightSchedule({ airportCode = 'DPS' }: { airportCode?: string }) {
+  const [flights, setFlights] = useState<Flight[]>(mockFlights);
+  
+  const getStatusColor = (status: Flight['status']) => {
+    switch (status) {
+      case 'last_call': return 'flight-last-call';
+      case 'closed': return 'flight-closed';
+      case 'gate_open': return 'flight-gate-open';
+      case 'check_in': return 'flight-check-in';
+      case 'delay': return 'flight-delay';
+      default: return 'flight-on-schedule';
+    }
+  };
 
   return (
-    <div className="tv-widget p-6 flex flex-col h-full w-full">
-      <div className="flex justify-between items-center mb-4">
-        <h3 className="tv-text-xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-teal-400 to-emerald-300">Live Departures • {airport}</h3>
-        <span className="text-[10px] tv-text-muted tracking-widest uppercase px-2 shadow-sm rounded-full border border-white/10 bg-white/5 py-1">AviationStack Sync</span>
+    <div className="tv-widget flex flex-col h-full p-6 bg-slate-900/40 border-white/10 backdrop-blur-2xl">
+      {/* Header */}
+      <div className="flex items-center justify-between mb-6">
+        <div className="flex items-center gap-3">
+          <span className="text-2xl">✈️</span>
+          <span className="text-white/60 text-[12px] font-black uppercase tracking-[0.2em]">Flight Schedule</span>
+        </div>
+        <div className="px-3 py-1 rounded-full bg-teal-500/20 border border-teal-500/30 text-[10px] text-teal-300 font-black tracking-widest uppercase">
+           {airportCode} Airport
+        </div>
       </div>
 
-      <div className="space-y-3 flex-1 overflow-hidden relative">
-        {flights.length === 0 ? (
-          <p className="tv-text-muted text-center pt-8">No current flights scheduled from {airport}.</p>
-        ) : (
-          flights.slice(0, 5).map((flight: any) => {
-             // Assign colors dynamically based on real statuses
-             let statusColor = "text-emerald-400";
-             if (flight.status === 'DELAYED') statusColor = "text-amber-400";
-             else if (flight.status === 'CANCELLED') statusColor = "text-rose-500";
-             else if (flight.status === 'BOARDING') statusColor = "text-teal-300 animate-pulse font-bold";
+      {/* Table */}
+      <div className="flex-1 overflow-hidden">
+        <table className="w-full text-left border-collapse">
+          <thead className="sticky top-0 z-10 border-b border-white/10 bg-slate-900/20">
+            <tr>
+              <th className="pb-3 text-[10px] font-black text-white/40 uppercase tracking-widest">Flight</th>
+              <th className="pb-3 text-[10px] font-black text-white/40 uppercase tracking-widest">Time</th>
+              <th className="pb-3 text-[10px] font-black text-white/40 uppercase tracking-widest">Dest</th>
+              <th className="pb-3 text-[10px] font-black text-white/40 uppercase tracking-widest">Gate</th>
+              <th className="pb-3 text-[10px] font-black text-white/40 uppercase tracking-widest text-right">Remarks</th>
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-white/5">
+            {flights.map((flight) => (
+              <tr key={flight.id} className="transition-colors hover:bg-white/5 group">
+                <td className="py-3 text-[14px] font-black text-white/90 tv-font-display tracking-[0.1em]">{flight.code}</td>
+                <td className="py-3 text-[14px] font-bold text-white/70">{flight.time}</td>
+                <td className="py-3 text-[14px] font-medium text-white/80 truncate max-w-[120px]">{flight.destination}</td>
+                <td className="py-3 text-[14px] font-bold text-teal-400/80">{flight.gate}</td>
+                <td className={`py-3 text-[13px] font-black text-right tracking-tight ${getStatusColor(flight.status)}`}>
+                  {flight.remarks}
+                </td>
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
 
-             return (
-              <div key={flight.id} className="flex items-center justify-between p-3.5 bg-black/20 rounded-xl border border-white/10 shadow-[0_4px_12px_rgba(0,0,0,0.1)] backdrop-blur-md">
-                <div className="flex flex-col gap-1">
-                  <span className="text-[15px] font-semibold text-white/90 font-mono tracking-wider leading-none">{flight.flightNumber}</span>
-                  <span className="text-[10px] uppercase font-medium text-white/50 bg-white/5 px-1.5 py-0.5 rounded-sm w-max border border-white/5">Gate {flight.gate}</span>
-                </div>
-
-                <div className="flex flex-col items-center">
-                 <span className="text-[16px] font-bold tracking-wide leading-none text-white/95">{flight.destination}</span>
-                 <span className={`text-[9px] tracking-widest uppercase font-semibold mt-1.5 ${statusColor}`}>
-                    {flight.status}
-                 </span>
-                </div>
-
-                <div className="flex flex-col text-right">
-                  <span className="text-[18px] font-bold font-mono text-white/90 leading-none">{flight.scheduledTime}</span>
-                </div>
-              </div>
-            );
-          })
-        )}
+      <div className="mt-4 pt-4 border-t border-white/5 flex justify-between items-center">
+         <span className="text-[10px] text-white/20 font-bold tracking-widest">LAST UPDATED: 19:42</span>
+         <div className="flex gap-1">
+            {[1, 2, 3].map(i => (
+              <div key={i} className={`w-1.5 h-1.5 rounded-full ${i === 1 ? 'bg-teal-500' : 'bg-white/10'}`} />
+            ))}
+         </div>
       </div>
     </div>
   );

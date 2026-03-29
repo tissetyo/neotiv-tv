@@ -16,11 +16,11 @@ export default async function AdminHotelsPage() {
   })).sort((a: any, b: any) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime());
 
   return (
-    <div style={{ padding: '32px', maxWidth: '1200px', margin: '0 auto' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
+    <div className="p-12 max-w-[1400px] mx-auto font-staff">
+      <div className="flex justify-between items-center mb-10">
         <div>
-           <h1 style={{ fontSize: '24px', fontWeight: 700, color: '#0f172a' }}>Hotel Management</h1>
-           <p style={{ color: '#64748b' }}>Provision and manage all tenant properties</p>
+           <h1 className="text-3xl font-black text-slate-900 tracking-tight leading-none mb-2">Hospitality Ecosystem</h1>
+           <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Global Property Provisioning & Instance Management</p>
         </div>
       </div>
       <HotelsClient initialHotels={formattedHotels} />

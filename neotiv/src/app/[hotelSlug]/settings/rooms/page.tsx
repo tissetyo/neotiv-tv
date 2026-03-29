@@ -21,9 +21,12 @@ export default async function RoomsSettingsPage({ params }: { params: Promise<{ 
     .eq('hotel_id', hotel.id);
 
   return (
-    <div style={{ padding: '32px', maxWidth: '1200px', margin: '0 auto' }}>
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '24px' }}>
-        <h1 style={{ fontSize: '24px', fontWeight: 700, color: '#0f172a' }}>Manage Rooms</h1>
+    <div className="p-12 max-w-[1400px] mx-auto font-staff">
+      <div className="flex justify-between items-center mb-10">
+        <div>
+          <h1 className="text-3xl font-black text-slate-900 tracking-tight leading-none mb-2">Room Inventory</h1>
+          <p className="text-xs font-bold text-slate-400 uppercase tracking-widest">Physical Asset Management</p>
+        </div>
       </div>
       <RoomsClient hotelId={hotel.id} initialRooms={rooms || []} roomTypes={roomTypes || []} />
     </div>
